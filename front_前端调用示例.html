@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FebryChat - 即时通讯平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a6cf7;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --sidebar-width: 300px;
+            --header-height: 60px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            color: #333;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        /* 登录页面样式 */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #4a6cf7, #6f42c1);
+        }
+        
+        .login-box {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            padding: 30px;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-header h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .login-header p {
+            color: var(--secondary-color);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            background-color: #3a5bd9;
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .server-selector {
+            margin-bottom: 20px;
+        }
+        
+        .server-selector select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: white;
+        }
+        
+        .form-footer {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .form-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        /* 主应用样式 */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .header {
+            height: var(--header-height);
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e0e0e0;
+            background-color: white;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .search-box {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .tab.active {
+            border-bottom: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .tab:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .contacts-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .contact-item {
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .contact-item:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .contact-item.active {
+            background-color: #e6f0ff;
+        }
+        
+        .contact-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .contact-info {
+            flex: 1;
+        }
+        
+        .contact-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .contact-status {
+            font-size: 12px;
+            color: var(--secondary-color);
+        }
+        
+        .online-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--success-color);
+            margin-left: auto;
+        }
+        
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .chat-header {
+            height: var(--header-height);
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #e0e0e0;
+            background-color: white;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+        }
+        
+        .message.own {
+            justify-content: flex-end;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 12px 15px;
+            border-radius: 18px;
+            position: relative;
+        }
+        
+        .message.other .message-content {
+            background-color: white;
+            border-top-left-radius: 5px;
+        }
+        
+        .message.own .message-content {
+            background-color: var(--primary-color);
+            color: white;
+            border-top-right-radius: 5px;
+        }
+        
+        .message-sender {
+            font-size: 12px;
+            margin-bottom: 5px;
+            color: var(--secondary-color);
+        }
+        
+        .message-time {
+            font-size: 11px;
+            text-align: right;
+            margin-top: 5px;
+            opacity: 0.7;
+        }
+        
+        .chat-input {
+            padding: 15px;
+            border-top: 1px solid #e0e0e0;
+            background-color: white;
+            display: flex;
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        
+        .send-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            max-width: 400px;
+        }
+        
+        .notification.success {
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .notification.error {
+            border-left: 4px solid var(--danger-color);
+        }
+        
+        .notification.warning {
+            border-left: 4px solid var(--warning-color);
+        }
+        
+        .notification-icon {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+        
+        .notification.success .notification-icon {
+            color: var(--success-color);
+        }
+        
+        .notification.error .notification-icon {
+            color: var(--danger-color);
+        }
+        
+        .notification.warning .notification-icon {
+            color: var(--warning-color);
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 10px;
+            width: 500px;
+            max-width: 90%;
+            padding: 30px;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--secondary-color);
+        }
+        
+        .friend-request-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .friend-request-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .friend-request-actions button {
+            margin-left: 10px;
+        }
+        
+        .btn-sm {
+            padding: 8px 15px;
+            font-size: 14px;
+            width: auto;
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+        }
+        
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: absolute;
+                z-index: 10;
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--secondary-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录页面 -->
+    <div id="login-page" class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <h1>FebryChat</h1>
+                <p>连接世界，沟通无限</p>
+            </div>
+            
+            <div class="server-selector">
+                <label for="server-select">选择服务器</label>
+                <select id="server-select" class="form-control">
+                    <option value="192.168.1.102:7981">本地服务器 (192.168.1.102:7981)</option>
+                    <option value="chat.example.com:7981">示例服务器 (chat.example.com:7981)</option>
+                    <option value="custom">自定义服务器</option>
+                </select>
+                <div id="custom-server" class="form-group hidden">
+                    <input type="text" id="custom-server-input" class="form-control" placeholder="输入服务器地址，如: 192.168.1.100:7981">
+                </div>
+            </div>
+            
+            <div id="login-form">
+                <div class="form-group">
+                    <label for="login-username">用户名</label>
+                    <input type="text" id="login-username" class="form-control" placeholder="请输入用户名">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">密码</label>
+                    <input type="password" id="login-password" class="form-control" placeholder="请输入密码">
+                </div>
+                <button id="login-btn" class="btn">登录</button>
+                <div class="form-footer">
+                    <a href="#" id="show-register">没有账号？立即注册</a>
+                </div>
+            </div>
+            
+            <div id="register-form" class="hidden">
+                <div class="form-group">
+                    <label for="register-username">用户名</label>
+                    <input type="text" id="register-username" class="form-control" placeholder="请输入用户名">
+                </div>
+                <div class="form-group">
+                    <label for="register-password">密码</label>
+                    <input type="password" id="register-password" class="form-control" placeholder="请输入密码">
+                </div>
+                <div class="form-group">
+                    <label for="register-nickname">昵称</label>
+                    <input type="text" id="register-nickname" class="form-control" placeholder="请输入昵称（可选）">
+                </div>
+                <button id="register-btn" class="btn">注册</button>
+                <div class="form-footer">
+                    <a href="#" id="show-login">已有账号？立即登录</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 主应用 -->
+    <div id="app" class="app-container hidden">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="header">
+                <div class="user-info">
+                    <div class="user-avatar" id="user-avatar">U</div>
+                    <div>
+                        <div id="user-name">用户名</div>
+                        <div class="contact-status" id="user-status">在线</div>
+                    </div>
+                </div>
+                <button id="logout-btn" class="btn btn-secondary btn-sm">退出</button>
+            </div>
+            
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="搜索联系人...">
+            </div>
+            
+            <div class="tabs">
+                <div class="tab active" data-tab="friends">好友</div>
+                <div class="tab" data-tab="groups">群组</div>
+                <div class="tab" data-tab="requests">好友请求</div>
+            </div>
+            
+            <div class="contacts-list">
+                <!-- 好友列表 -->
+                <div id="friends-tab" class="tab-content">
+                    <!-- 好友列表将通过JS动态生成 -->
+                </div>
+                
+                <!-- 群组列表 -->
+                <div id="groups-tab" class="tab-content hidden">
+                    <div class="contact-item">
+                        <div class="contact-avatar">G</div>
+                        <div class="contact-info">
+                            <div class="contact-name">技术交流群</div>
+                            <div class="contact-status">最后消息预览...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 好友请求列表 -->
+                <div id="requests-tab" class="tab-content hidden">
+                    <!-- 好友请求将通过JS动态生成 -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- 聊天区域 -->
+        <div class="chat-container">
+            <div class="chat-header">
+                <button class="mobile-menu-btn" id="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="user-info">
+                    <div class="user-avatar" id="chat-user-avatar">F</div>
+                    <div>
+                        <div id="chat-user-name">选择联系人开始聊天</div>
+                        <div class="contact-status" id="chat-user-status">离线</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="chat-messages">
+                <!-- 消息将通过JS动态生成 -->
+                <div class="welcome-message">
+                    <p>欢迎使用 FebryChat！请从左侧选择联系人开始聊天。</p>
+                </div>
+            </div>
+            
+            <div class="chat-input">
+                <input type="text" class="message-input" id="message-input" placeholder="输入消息..." disabled>
+                <button class="send-btn" id="send-btn" disabled>
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 添加好友模态框 -->
+    <div id="add-friend-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">添加好友</h3>
+                <button class="close-btn" id="close-add-friend-modal">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="friend-username">用户名</label>
+                <input type="text" id="friend-username" class="form-control" placeholder="请输入要添加的用户名">
+            </div>
+            <button id="send-friend-request-btn" class="btn">发送好友请求</button>
+        </div>
+    </div>
+    
+    <!-- 通知 -->
+    <div id="notification-container"></div>
+
+    <script>
+        // 全局变量
+        let currentUser = null;
+        let currentChat = null;
+        let socket = null;
+        let serverUrl = '';
+        let apiBaseUrl = '';
+        
+        // DOM元素
+        const loginPage = document.getElementById('login-page');
+        const app = document.getElementById('app');
+        const serverSelect = document.getElementById('server-select');
+        const customServerDiv = document.getElementById('custom-server');
+        const customServerInput = document.getElementById('custom-server-input');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const loginBtn = document.getElementById('login-btn');
+        const registerBtn = document.getElementById('register-btn');
+        const showRegisterLink = document.getElementById('show-register');
+        const showLoginLink = document.getElementById('show-login');
+        const logoutBtn = document.getElementById('logout-btn');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.querySelector('.sidebar');
+        const tabs = document.querySelectorAll('.tab');
+        const friendsTab = document.getElementById('friends-tab');
+        const groupsTab = document.getElementById('groups-tab');
+        const requestsTab = document.getElementById('requests-tab');
+        const chatMessages = document.getElementById('chat-messages');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const userAvatar = document.getElementById('user-avatar');
+        const userName = document.getElementById('user-name');
+        const chatUserAvatar = document.getElementById('chat-user-avatar');
+        const chatUserName = document.getElementById('chat-user-name');
+        const chatUserStatus = document.getElementById('chat-user-status');
+        const addFriendModal = document.getElementById('add-friend-modal');
+        const closeAddFriendModal = document.getElementById('close-add-friend-modal');
+        const sendFriendRequestBtn = document.getElementById('send-friend-request-btn');
+        const friendUsernameInput = document.getElementById('friend-username');
+        
+        // 事件监听器
+        document.addEventListener('DOMContentLoaded', init);
+        
+        function init() {
+            // 服务器选择事件
+            serverSelect.addEventListener('change', function() {
+                if (this.value === 'custom') {
+                    customServerDiv.classList.remove('hidden');
+                } else {
+                    customServerDiv.classList.add('hidden');
+                }
+            });
+            
+            // 登录/注册切换
+            showRegisterLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+            });
+            
+            showLoginLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                registerForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+            });
+            
+            // 登录按钮
+            loginBtn.addEventListener('click', handleLogin);
+            
+            // 注册按钮
+            registerBtn.addEventListener('click', handleRegister);
+            
+            // 退出登录
+            logoutBtn.addEventListener('click', handleLogout);
+            
+            // 移动端菜单按钮
+            mobileMenuBtn.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+            
+            // 标签切换
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // 移除所有active类
+                    tabs.forEach(t => t.classList.remove('active'));
+                    // 添加active类到当前标签
+                    this.classList.add('active');
+                    
+                    // 隐藏所有标签内容
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    
+                    // 显示当前标签内容
+                    const tabId = this.getAttribute('data-tab') + '-tab';
+                    document.getElementById(tabId).classList.remove('hidden');
+                    
+                    // 如果是好友请求标签，刷新请求列表
+                    if (this.getAttribute('data-tab') === 'requests') {
+                        loadFriendRequests();
+                    }
+                    
+                    // 如果是好友标签，显示添加好友按钮
+                    if (this.getAttribute('data-tab') === 'friends') {
+                        showAddFriendButton();
+                    } else {
+                        hideAddFriendButton();
+                    }
+                });
+            });
+            
+            // 发送消息
+            sendBtn.addEventListener('click', sendMessage);
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            // 添加好友模态框
+            closeAddFriendModal.addEventListener('click', function() {
+                addFriendModal.classList.add('hidden');
+            });
+            
+            sendFriendRequestBtn.addEventListener('click', sendFriendRequest);
+            
+            // 检查本地存储的登录状态
+            checkLoginStatus();
+        }
+        
+        // 检查登录状态
+        function checkLoginStatus() {
+            const token = localStorage.getItem('febrychat_token');
+            const user = localStorage.getItem('febrychat_user');
+            const server = localStorage.getItem('febrychat_server');
+            
+            if (token && user && server) {
+                currentUser = JSON.parse(user);
+                serverUrl = server;
+                apiBaseUrl = `http://${serverUrl}/api`;
+                
+                // 更新UI
+                updateUserInfo();
+                
+                // 切换到主应用
+                loginPage.classList.add('hidden');
+                app.classList.remove('hidden');
+                
+                // 连接WebSocket
+                connectWebSocket();
+                
+                // 加载好友列表
+                loadFriends();
+            }
+        }
+        
+        // 处理登录
+        function handleLogin() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            // 获取服务器地址
+            if (serverSelect.value === 'custom') {
+                serverUrl = customServerInput.value.trim();
+            } else {
+                serverUrl = serverSelect.value;
+            }
+            
+            if (!serverUrl) {
+                showNotification('请选择或输入服务器地址', 'error');
+                return;
+            }
+            
+            if (!username || !password) {
+                showNotification('请输入用户名和密码', 'error');
+                return;
+            }
+            
+            apiBaseUrl = `http://${serverUrl}/api`;
+            
+            // 发送登录请求
+            fetch(`${apiBaseUrl}/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 保存token和用户信息
+                    localStorage.setItem('febrychat_token', data.token);
+                    localStorage.setItem('febrychat_user', JSON.stringify({
+                        username: data.username,
+                        nickname: data.nickname
+                    }));
+                    localStorage.setItem('febrychat_server', serverUrl);
+                    
+                    currentUser = {
+                        username: data.username,
+                        nickname: data.nickname
+                    };
+                    
+                    // 更新UI
+                    updateUserInfo();
+                    
+                    // 切换到主应用
+                    loginPage.classList.add('hidden');
+                    app.classList.remove('hidden');
+                    
+                    // 连接WebSocket
+                    connectWebSocket();
+                    
+                    // 加载好友列表
+                    loadFriends();
+                    
+                    showNotification('登录成功', 'success');
+                } else {
+                    showNotification(data.message || '登录失败', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('登录错误:', error);
+                showNotification('连接服务器失败，请检查服务器地址', 'error');
+            });
+        }
+        
+        // 处理注册
+        function handleRegister() {
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+            const nickname = document.getElementById('register-nickname').value || username;
+            
+            // 获取服务器地址
+            if (serverSelect.value === 'custom') {
+                serverUrl = customServerInput.value.trim();
+            } else {
+                serverUrl = serverSelect.value;
+            }
+            
+            if (!serverUrl) {
+                showNotification('请选择或输入服务器地址', 'error');
+                return;
+            }
+            
+            if (!username || !password) {
+                showNotification('请输入用户名和密码', 'error');
+                return;
+            }
+            
+            apiBaseUrl = `http://${serverUrl}/api`;
+            
+            // 发送注册请求
+            fetch(`${apiBaseUrl}/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password,
+                    nickname: nickname
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('注册成功，请登录', 'success');
+                    // 切换到登录表单
+                    registerForm.classList.add('hidden');
+                    loginForm.classList.remove('hidden');
+                    // 填充用户名
+                    document.getElementById('login-username').value = username;
+                } else {
+                    showNotification(data.message || '注册失败', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('注册错误:', error);
+                showNotification('连接服务器失败，请检查服务器地址', 'error');
+            });
+        }
+        
+        // 处理退出登录
+        function handleLogout() {
+            // 关闭WebSocket连接
+            if (socket) {
+                socket.close();
+            }
+            
+            // 清除本地存储
+            localStorage.removeItem('febrychat_token');
+            localStorage.removeItem('febrychat_user');
+            localStorage.removeItem('febrychat_server');
+            
+            // 切换到登录页面
+            app.classList.add('hidden');
+            loginPage.classList.remove('hidden');
+            
+            // 重置表单
+            document.getElementById('login-username').value = '';
+            document.getElementById('login-password').value = '';
+            
+            showNotification('已退出登录', 'success');
+        }
+        
+        // 更新用户信息
+        function updateUserInfo() {
+            if (currentUser) {
+                userAvatar.textContent = currentUser.nickname.charAt(0).toUpperCase();
+                userName.textContent = currentUser.nickname;
+            }
+        }
+        
+        // 连接WebSocket
+        function connectWebSocket() {
+            try {
+                socket = new WebSocket(`ws://${serverUrl}`);
+                
+                socket.onopen = function() {
+                    console.log('WebSocket连接已建立');
+                    // 发送登录消息
+                    socket.send(JSON.stringify({
+                        type: 'login',
+                        username: currentUser.username,
+                        password: '已通过HTTP认证' // 实际密码已在HTTP登录时验证
+                    }));
+                };
+                
+                socket.onmessage = function(event) {
+                    const message = JSON.parse(event.data);
+                    handleWebSocketMessage(message);
+                };
+                
+                socket.onclose = function() {
+                    console.log('WebSocket连接已关闭');
+                    // 尝试重新连接
+                    setTimeout(connectWebSocket, 5000);
+                };
+                
+                socket.onerror = function(error) {
+                    console.error('WebSocket错误:', error);
+                };
+            } catch (error) {
+                console.error('WebSocket连接失败:', error);
+                showNotification('实时通信连接失败', 'error');
+            }
+        }
+        
+        // 处理WebSocket消息
+        function handleWebSocketMessage(message) {
+            switch (message.type) {
+                case 'new_message':
+                    handleNewMessage(message);
+                    break;
+                case 'status_update':
+                    handleStatusUpdate(message);
+                    break;
+                case 'new_friend_request':
+                    handleNewFriendRequest(message);
+                    break;
+                case 'friend_request_accepted':
+                    handleFriendRequestAccepted(message);
+                    break;
+                default:
+                    console.log('未知消息类型:', message);
+            }
+        }
+        
+        // 处理新消息
+        function handleNewMessage(message) {
+            // 如果当前正在与发送者聊天，显示消息
+            if (currentChat && currentChat.username === message.sender) {
+                displayMessage(message, 'other');
+            }
+            
+            // 更新好友列表中的最后消息
+            updateFriendLastMessage(message.sender, message.content);
+            
+            // 显示通知（如果当前聊天不是与发送者）
+            if (!currentChat || currentChat.username !== message.sender) {
+                showNotification(`新消息来自 ${message.sender}: ${message.content}`, 'info');
+            }
+        }
+        
+        // 处理状态更新
+        function handleStatusUpdate(message) {
+            // 更新好友在线状态
+            updateFriendStatus(message.username, message.status === 'online');
+        }
+        
+        // 处理新好友请求
+        function handleNewFriendRequest(message) {
+            showNotification(`收到来自 ${message.from_user} 的好友请求`, 'info');
+            // 刷新好友请求列表
+            loadFriendRequests();
+        }
+        
+        // 处理好友请求被接受
+        function handleFriendRequestAccepted(message) {
+            showNotification(`${message.by_user} 接受了您的好友请求`, 'success');
+            // 刷新好友列表
+            loadFriends();
+        }
+        
+        // 加载好友列表
+        function loadFriends() {
+            // 模拟API调用
+            // 实际实现应该调用 /api/friends
+            setTimeout(() => {
+                // 模拟好友数据
+                const friends = [
+                    { username: 'user1', nickname: '用户一', online: true },
+                    { username: 'user2', nickname: '用户二', online: false },
+                    { username: 'admin', nickname: '系统管理员', online: true }
+                ];
+                
+                displayFriends(friends);
+            }, 500);
+        }
+        
+        // 显示好友列表
+        function displayFriends(friends) {
+            friendsTab.innerHTML = '';
+            
+            friends.forEach(friend => {
+                const friendElement = document.createElement('div');
+                friendElement.className = 'contact-item';
+                friendElement.setAttribute('data-username', friend.username);
+                
+                friendElement.innerHTML = `
+                    <div class="contact-avatar">${friend.nickname.charAt(0).toUpperCase()}</div>
+                    <div class="contact-info">
+                        <div class="contact-name">${friend.nickname}</div>
+                        <div class="contact-status">${friend.online ? '在线' : '离线'}</div>
+                    </div>
+                    ${friend.online ? '<div class="online-indicator"></div>' : ''}
+                `;
+                
+                friendElement.addEventListener('click', function() {
+                    // 设置当前聊天
+                    currentChat = friend;
+                    
+                    // 更新聊天头部
+                    chatUserAvatar.textContent = friend.nickname.charAt(0).toUpperCase();
+                    chatUserName.textContent = friend.nickname;
+                    chatUserStatus.textContent = friend.online ? '在线' : '离线';
+                    
+                    // 启用消息输入
+                    messageInput.disabled = false;
+                    sendBtn.disabled = false;
+                    
+                    // 加载聊天历史
+                    loadChatHistory(friend.username);
+                    
+                    // 在移动端关闭侧边栏
+                    if (window.innerWidth <= 768) {
+                        sidebar.classList.remove('active');
+                    }
+                });
+                
+                friendsTab.appendChild(friendElement);
+            });
+            
+            // 显示添加好友按钮
+            showAddFriendButton();
+        }
+        
+        // 显示添加好友按钮
+        function showAddFriendButton() {
+            // 检查是否已存在添加好友按钮
+            if (!document.getElementById('add-friend-btn')) {
+                const addFriendBtn = document.createElement('div');
+                addFriendBtn.id = 'add-friend-btn';
+                addFriendBtn.className = 'contact-item';
+                addFriendBtn.innerHTML = `
+                    <div class="contact-avatar"><i class="fas fa-user-plus"></i></div>
+                    <div class="contact-info">
+                        <div class="contact-name">添加好友</div>
+                    </div>
+                `;
+                
+                addFriendBtn.addEventListener('click', function() {
+                    addFriendModal.classList.remove('hidden');
+                });
+                
+                friendsTab.appendChild(addFriendBtn);
+            }
+        }
+        
+        // 隐藏添加好友按钮
+        function hideAddFriendButton() {
+            const addFriendBtn = document.getElementById('add-friend-btn');
+            if (addFriendBtn) {
+                addFriendBtn.remove();
+            }
+        }
+        
+        // 加载好友请求
+        function loadFriendRequests() {
+            // 模拟API调用
+            // 实际实现应该调用 /api/friends/requests
+            setTimeout(() => {
+                // 模拟好友请求数据
+                const requests = [
+                    { from_user: 'user3', created_at: '2025-10-07 10:30:00' },
+                    { from_user: 'user4', created_at: '2025-10-06 15:20:00' }
+                ];
+                
+                displayFriendRequests(requests);
+            }, 500);
+        }
+        
+        // 显示好友请求
+        function displayFriendRequests(requests) {
+            requestsTab.innerHTML = '';
+            
+            if (requests.length === 0) {
+                requestsTab.innerHTML = '<div class="contact-item">暂无好友请求</div>';
+                return;
+            }
+            
+            requests.forEach(request => {
+                const requestElement = document.createElement('div');
+                requestElement.className = 'friend-request-item';
+                
+                requestElement.innerHTML = `
+                    <div class="friend-request-info">
+                        <div class="contact-avatar">${request.from_user.charAt(0).toUpperCase()}</div>
+                        <div>
+                            <div class="contact-name">${request.from_user}</div>
+                            <div class="contact-status">${request.created_at}</div>
+                        </div>
+                    </div>
+                    <div class="friend-request-actions">
+                        <button class="btn btn-success btn-sm accept-request" data-from="${request.from_user}">接受</button>
+                        <button class="btn btn-danger btn-sm reject-request" data-from="${request.from_user}">拒绝</button>
+                    </div>
+                `;
+                
+                requestsTab.appendChild(requestElement);
+            });
+            
+            // 添加事件监听器
+            document.querySelectorAll('.accept-request').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const fromUser = this.getAttribute('data-from');
+                    respondToFriendRequest(fromUser, true);
+                });
+            });
+            
+            document.querySelectorAll('.reject-request').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const fromUser = this.getAttribute('data-from');
+                    respondToFriendRequest(fromUser, false);
+                });
+            });
+        }
+        
+        // 响应好友请求
+        function respondToFriendRequest(fromUser, accept) {
+            // 模拟API调用
+            // 实际实现应该调用 /api/friends/requests/respond
+            setTimeout(() => {
+                showNotification(accept ? 
+                    `已接受 ${fromUser} 的好友请求` : 
+                    `已拒绝 ${fromUser} 的好友请求`, 
+                    'success');
+                
+                // 刷新好友请求列表
+                loadFriendRequests();
+                
+                // 如果接受了请求，刷新好友列表
+                if (accept) {
+                    loadFriends();
+                }
+            }, 500);
+        }
+        
+        // 发送好友请求
+        function sendFriendRequest() {
+            const friendUsername = friendUsernameInput.value.trim();
+            
+            if (!friendUsername) {
+                showNotification('请输入用户名', 'error');
+                return;
+            }
+            
+            // 模拟API调用
+            // 实际实现应该调用 /api/friends/requests/send
+            setTimeout(() => {
+                showNotification(`好友请求已发送给 ${friendUsername}`, 'success');
+                addFriendModal.classList.add('hidden');
+                friendUsernameInput.value = '';
+            }, 500);
+        }
+        
+        // 加载聊天历史
+        function loadChatHistory(friendUsername) {
+            // 模拟API调用
+            // 实际实现应该调用 /api/messages/{friendUsername}
+            setTimeout(() => {
+                // 模拟聊天历史
+                const messages = [
+                    { sender: friendUsername, content: '你好！', timestamp: '2025-10-07 10:25:00' },
+                    { sender: currentUser.username, content: '你好，很高兴认识你！', timestamp: '2025-10-07 10:26:00' },
+                    { sender: friendUsername, content: '这个聊天应用很不错！', timestamp: '2025-10-07 10:27:00' }
+                ];
+                
+                displayChatHistory(messages);
+            }, 500);
+        }
+        
+        // 显示聊天历史
+        function displayChatHistory(messages) {
+            chatMessages.innerHTML = '';
+            
+            messages.forEach(message => {
+                const isOwn = message.sender === currentUser.username;
+                displayMessage(message, isOwn ? 'own' : 'other');
+            });
+            
+            // 滚动到底部
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // 显示消息
+        function displayMessage(message, type) {
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${type}`;
+            
+            const time = new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            messageElement.innerHTML = `
+                <div class="message-content">
+                    ${type === 'other' ? `<div class="message-sender">${message.sender}</div>` : ''}
+                    <div class="message-text">${message.content}</div>
+                    <div class="message-time">${time}</div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageElement);
+            
+            // 滚动到底部
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // 发送消息
+        function sendMessage() {
+            const content = messageInput.value.trim();
+            
+            if (!content || !currentChat) {
+                return;
+            }
+            
+            // 创建消息对象
+            const message = {
+                type: 'send_message',
+                to: currentChat.username,
+                content: content,
+                timestamp: new Date().toISOString()
+            };
+            
+            // 通过WebSocket发送消息
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify(message));
+                
+                // 在UI中显示消息
+                displayMessage({
+                    sender: currentUser.username,
+                    content: content,
+                    timestamp: message.timestamp
+                }, 'own');
+                
+                // 清空输入框
+                messageInput.value = '';
+            } else {
+                showNotification('连接已断开，无法发送消息', 'error');
+            }
+        }
+        
+        // 更新好友最后消息
+        function updateFriendLastMessage(friendUsername, lastMessage) {
+            const friendElement = document.querySelector(`.contact-item[data-username="${friendUsername}"]`);
+            if (friendElement) {
+                const statusElement = friendElement.querySelector('.contact-status');
+                if (statusElement) {
+                    statusElement.textContent = lastMessage;
+                }
+            }
+        }
+        
+        // 更新好友状态
+        function updateFriendStatus(friendUsername, online) {
+            const friendElement = document.querySelector(`.contact-item[data-username="${friendUsername}"]`);
+            if (friendElement) {
+                const statusElement = friendElement.querySelector('.contact-status');
+                const onlineIndicator = friendElement.querySelector('.online-indicator');
+                
+                if (statusElement) {
+                    statusElement.textContent = online ? '在线' : '离线';
+                }
+                
+                if (onlineIndicator) {
+                    onlineIndicator.style.display = online ? 'block' : 'none';
+                } else if (online) {
+                    // 如果在线指示器不存在但用户在线，添加一个
+                    const indicator = document.createElement('div');
+                    indicator.className = 'online-indicator';
+                    friendElement.appendChild(indicator);
+                }
+                
+                // 如果当前正在与该好友聊天，更新状态
+                if (currentChat && currentChat.username === friendUsername) {
+                    chatUserStatus.textContent = online ? '在线' : '离线';
+                }
+            }
+        }
+        
+        // 显示通知
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            let icon = '';
+            switch (type) {
+                case 'success':
+                    icon = 'fa-check-circle';
+                    break;
+                case 'error':
+                    icon = 'fa-exclamation-circle';
+                    break;
+                case 'warning':
+                    icon = 'fa-exclamation-triangle';
+                    break;
+                default:
+                    icon = 'fa-info-circle';
+            }
+            
+            notification.innerHTML = `
+                <div class="notification-icon"><i class="fas ${icon}"></i></div>
+                <div class="notification-message">${message}</div>
+            `;
+            
+            document.getElementById('notification-container').appendChild(notification);
+            
+            // 3秒后自动移除
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
